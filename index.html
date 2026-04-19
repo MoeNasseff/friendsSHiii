@@ -240,24 +240,46 @@
     }
     .legend-badge:hover{transform:scale(1.06);}
 
-    /* ── Check-in mini modal ── */
+    /* ── Check-in full modal ── */
     .checkin-modal{
       position:fixed;inset:0;z-index:600;
-      background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);
+      background:rgba(0,0,0,0);backdrop-filter:blur(0px);
       display:flex;align-items:center;justify-content:center;
-      opacity:0;pointer-events:none;transition:opacity .25s ease;
+      pointer-events:none;transition:background .35s ease,backdrop-filter .35s ease;
     }
-    .checkin-modal.open{opacity:1;pointer-events:all;}
+    .checkin-modal.open{
+      background:rgba(0,0,0,0.78);backdrop-filter:blur(14px) saturate(0.7);
+      pointer-events:all;
+    }
     .checkin-box{
-      background:#0d1a0f;border:1px solid rgba(184,201,168,0.18);
-      border-radius:26px;padding:36px 32px;
-      max-width:360px;width:90%;text-align:center;
-      transform:translateY(22px) scale(.95);
-      transition:transform .38s cubic-bezier(.34,1.56,.64,1);
-      box-shadow:0 40px 100px rgba(0,0,0,.65);
+      background:#0d1a0f;border:1px solid rgba(184,201,168,0.16);
+      border-radius:28px;padding:40px 36px;
+      max-width:580px;width:95%;
+      box-shadow:0 50px 120px rgba(0,0,0,.7),0 0 80px rgba(255,107,43,.06);
+      overflow:hidden;
     }
-    body.day .checkin-box{background:#f5f0e8;border-color:rgba(200,180,140,0.4);}
-    .checkin-modal.open .checkin-box{transform:translateY(0) scale(1);}
+    body.day .checkin-box{background:#f0ece4;border-color:rgba(200,180,140,0.4);}
+
+    /* user pick cards in checkin modal */
+    .ci-card{
+      border-radius:16px;padding:16px 10px;cursor:pointer;
+      border:2px solid rgba(184,201,168,0.1);
+      transition:border-color .25s,background .25s,transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;
+      position:relative;overflow:hidden;
+      display:flex;flex-direction:column;align-items:center;gap:8px;
+    }
+    .ci-card:hover{
+      border-color:rgba(255,107,43,0.5);
+      background:rgba(255,107,43,0.07);
+      transform:translateY(-5px) scale(1.04);
+      box-shadow:0 16px 40px rgba(0,0,0,.3),0 0 20px rgba(255,107,43,.12);
+    }
+    .ci-card.is-in{
+      border-color:#4ade80;
+      background:rgba(74,222,128,0.07);
+      box-shadow:0 0 24px rgba(74,222,128,.2);
+    }
+    .ci-card.is-in:hover{border-color:#f87171;background:rgba(248,113,113,0.07);}
 
     /* ── Modal ── */
     .modal-overlay{
@@ -398,13 +420,20 @@
 <!-- Check-in modal -->
 <div class="checkin-modal" id="checkin-modal">
   <div class="checkin-box">
-    <div id="ci-avatar" style="width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 18px;border:3px solid var(--ember);"></div>
-    <div id="ci-title" style="font-family:'Playfair Display',serif;font-size:24px;color:#d4e3c4;margin-bottom:6px;"></div>
-    <div id="ci-sub" style="font-size:14px;color:#8a9e7a;margin-bottom:26px;"></div>
-    <div style="display:flex;gap:10px;">
-      <button onclick="closeCheckin()" style="flex:1;padding:13px;background:rgba(184,201,168,0.08);border:1px solid rgba(184,201,168,0.15);border-radius:12px;color:#8a9e7a;font-size:14px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(184,201,168,0.14)'" onmouseout="this.style.background='rgba(184,201,168,0.08)'">Not me</button>
-      <button id="ci-confirm-btn" onclick="confirmCheckin()" style="flex:2;padding:13px;background:linear-gradient(135deg,#ff6b2b,#f59e0b);border:none;border-radius:12px;color:#060d07;font-weight:700;font-size:15px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:transform .2s;box-shadow:0 8px 28px rgba(255,107,43,.28);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">I'm In! 🔥</button>
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:11px;color:var(--ember);text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px;">🔥 Night BBQ</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:30px;color:#d4e3c4;margin-bottom:8px;">Who are you?</h3>
+      <p style="color:#8a9e7a;font-size:14px;line-height:1.6;">Tap your photo to confirm you're in.<br>Tap again to step out.</p>
     </div>
+    <!-- User grid -->
+    <div id="ci-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;"></div>
+    <!-- Footer -->
+    <button onclick="closeCheckin()"
+      style="width:100%;padding:14px;background:rgba(184,201,168,0.07);border:1px solid rgba(184,201,168,0.14);border-radius:14px;color:#8a9e7a;font-size:14px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .22s;letter-spacing:.03em;"
+      onmouseover="this.style.background='rgba(184,201,168,0.13)'" onmouseout="this.style.background='rgba(184,201,168,0.07)'">
+      Close
+    </button>
   </div>
 </div>
 
@@ -416,7 +445,7 @@
       <span id="theme-icon">☀️</span>
       <span id="theme-label">Day Mode</span>
     </button>
-    <div id="legend-badge" class="legend-badge" onclick="document.getElementById('crew').scrollIntoView({behavior:'smooth'})"
+    <div id="legend-badge" class="legend-badge" onclick="openCheckin()"
          style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.18);border-radius:30px;padding:8px 16px;font-size:13px;color:#6ee7a0;">
       <span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px rgba(74,222,128,.7);animation:badge-glow 1.8s ease-in-out infinite;"></span>
       <span id="badge-count">0</span>&nbsp;/ 7 Legends In
@@ -624,51 +653,73 @@ function updateLegendCount() {
   document.getElementById('badge-count').textContent = checkedIn.size;
 }
 
-let checkinTarget = null;
+function openCheckin() {
+  // populate grid
+  document.getElementById('ci-grid').innerHTML = USERS.map(u => {
+    const isIn = checkedIn.has(u.id);
+    return `
+    <div class="ci-card ${isIn ? 'is-in' : ''}" id="ci-card-${u.id}" onclick="toggleCheckin('${u.id}')">
+      <div style="position:relative;width:72px;height:72px;border-radius:50%;overflow:hidden;border:3px solid ${isIn ? '#4ade80' : u.color+'55'};transition:border-color .25s;flex-shrink:0;">
+        ${u.img
+          ? `<img src="${u.img}" style="width:100%;height:100%;object-fit:cover;" onerror="this.outerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:${u.color}18;\\'>${u.emoji}</div>'">`
+          : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:${u.color}18;">${u.emoji}</div>`}
+        ${isIn ? `<div style="position:absolute;inset:0;background:rgba(74,222,128,0.18);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;">✓</div>` : ''}
+      </div>
+      <div style="font-size:13px;font-weight:600;color:${isIn ? '#4ade80' : '#b8c9a8'};">${u.name}</div>
+      <div style="font-size:10px;color:${isIn ? '#4ade80' : '#8a9e7a'};">${isIn ? "I'm in 🔥" : 'Tap to join'}</div>
+    </div>`;
+  }).join('');
 
-function openCheckin(userId) {
+  const overlay = document.getElementById('checkin-modal');
+  overlay.classList.add('open');
+
+  // GSAP stagger entrance
+  gsap.fromTo('.ci-card',
+    { opacity:0, y:28, scale:.82 },
+    { opacity:1, y:0, scale:1, duration:.5, stagger:.06, ease:'back.out(1.5)', delay:.1 }
+  );
+  gsap.fromTo('.checkin-box',
+    { opacity:0, scale:.9, y:40 },
+    { opacity:1, scale:1, y:0, duration:.45, ease:'back.out(1.4)' }
+  );
+}
+
+function toggleCheckin(userId) {
   const u = USERS.find(u => u.id === userId);
-  const alreadyIn = checkedIn.has(userId);
-  checkinTarget = userId;
+  const wasIn = checkedIn.has(userId);
 
-  const av = document.getElementById('ci-avatar');
-  av.style.borderColor = u.color;
-  av.innerHTML = u.img
-    ? `<img src="${u.img}" style="width:100%;height:100%;object-fit:cover;" onerror="this.outerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;background:${u.color}18;\\'>${u.emoji}</div>'">`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;background:${u.color}18;">${u.emoji}</div>`;
-
-  const btn = document.getElementById('ci-confirm-btn');
-  if (alreadyIn) {
-    document.getElementById('ci-title').textContent = `You're in, ${u.name}! 🎉`;
-    document.getElementById('ci-sub').textContent   = 'Changed your mind?';
-    btn.textContent = "👋 Actually I'm out";
-    btn.style.cssText = 'flex:2;padding:13px;background:rgba(255,107,43,0.12);border:1px solid rgba(255,107,43,0.3);border-radius:12px;color:#ff6b2b;font-weight:700;font-size:15px;font-family:\'Space Grotesk\',sans-serif;cursor:pointer;transition:transform .2s;';
+  if (wasIn) {
+    checkedIn.delete(userId);
+    showToast(`${u.emoji} ${u.name}`, "Stepped out 😢");
   } else {
-    document.getElementById('ci-title').textContent = `Hey ${u.name}!`;
-    document.getElementById('ci-sub').textContent   = 'Are you in for the BBQ? 🔥';
-    btn.textContent = "I'm In! 🔥";
-    btn.style.cssText = 'flex:2;padding:13px;background:linear-gradient(135deg,#ff6b2b,#f59e0b);border:none;border-radius:12px;color:#060d07;font-weight:700;font-size:15px;font-family:\'Space Grotesk\',sans-serif;cursor:pointer;transition:transform .2s;box-shadow:0 8px 28px rgba(255,107,43,.28);';
+    checkedIn.add(userId);
+    showToast(`${u.emoji} ${u.name}`, "You're in! See you at the fire 🔥");
   }
 
-  document.getElementById('checkin-modal').classList.add('open');
+  saveIn(); updateLegendCount(); renderCrew();
+
+  // animate the card in the modal
+  const card = document.getElementById('ci-card-' + userId);
+  if (card) {
+    const nowIn = checkedIn.has(userId);
+    card.classList.toggle('is-in', nowIn);
+    card.innerHTML = `
+      <div style="position:relative;width:72px;height:72px;border-radius:50%;overflow:hidden;border:3px solid ${nowIn ? '#4ade80' : u.color+'55'};transition:border-color .25s;flex-shrink:0;">
+        ${u.img
+          ? `<img src="${u.img}" style="width:100%;height:100%;object-fit:cover;">`
+          : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:${u.color}18;">${u.emoji}</div>`}
+        ${nowIn ? `<div style="position:absolute;inset:0;background:rgba(74,222,128,0.18);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;">✓</div>` : ''}
+      </div>
+      <div style="font-size:13px;font-weight:600;color:${nowIn ? '#4ade80' : '#b8c9a8'};">${u.name}</div>
+      <div style="font-size:10px;color:${nowIn ? '#4ade80' : '#8a9e7a'};">${nowIn ? "I'm in 🔥" : 'Tap to join'}</div>`;
+    gsap.fromTo(card, { scale:.88 }, { scale:1, duration:.4, ease:'back.out(1.8)' });
+  }
 }
 
 function closeCheckin() {
-  document.getElementById('checkin-modal').classList.remove('open');
-  checkinTarget = null;
-}
-
-function confirmCheckin() {
-  if (!checkinTarget) return;
-  const u = USERS.find(u => u.id === checkinTarget);
-  if (checkedIn.has(checkinTarget)) {
-    checkedIn.delete(checkinTarget);
-    showToast(`${u.emoji} ${u.name}`, "Removed from the crew 😢");
-  } else {
-    checkedIn.add(checkinTarget);
-    showToast(`${u.emoji} ${u.name}`, "You're in! See you at the fire 🔥");
-  }
-  saveIn(); updateLegendCount(); renderCrew(); closeCheckin();
+  gsap.to('.checkin-box', { opacity:0, scale:.92, y:20, duration:.28, ease:'power2.in',
+    onComplete: () => document.getElementById('checkin-modal').classList.remove('open')
+  });
 }
 
 document.getElementById('checkin-modal').addEventListener('click', e => {
@@ -901,7 +952,7 @@ function renderCrew() {
     }, 0);
 
     return `
-    <div class="crew-card reveal ${isIn ? 'confirmed' : 'pending'}" onclick="openCheckin('${u.id}')">
+    <div class="crew-card reveal ${isIn ? 'confirmed' : 'pending'}" onclick="openCheckin()">
       <div style="position:relative;display:inline-block;">
         <div class="crew-avatar" style="${isIn ? `border-color:${u.color};box-shadow:0 0 32px ${u.color}44,0 0 60px ${u.color}18;` : `border-color:${u.color}33;`}">
           ${u.img
