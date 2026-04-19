@@ -213,19 +213,51 @@
     }
 
     /* ── Crew ── */
-    .crew-card{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;}
+    .crew-card{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;cursor:pointer;}
     .crew-avatar{
       width:120px;height:120px;border-radius:50%;overflow:hidden;
       border:3px solid transparent;
-      transition:transform .3s,box-shadow .3s;
+      transition:transform .35s,box-shadow .35s,filter .4s,opacity .4s;
       background:rgba(184,201,168,0.1);
     }
-    .crew-avatar:hover{transform:scale(1.07);}
+    .crew-card:hover .crew-avatar{transform:scale(1.07);}
     .crew-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
-    .crew-fallback{
-      width:100%;height:100%;
-      display:flex;align-items:center;justify-content:center;font-size:48px;
+    .crew-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;}
+
+    /* confirmed vs pending crew states */
+    .crew-card.confirmed .crew-avatar { border-color: var(--ember); box-shadow:0 0 32px var(--glow-e),0 0 60px rgba(245,158,11,0.15); }
+    .crew-card.pending { opacity:.38; filter:grayscale(.65); }
+    .crew-card.pending:hover { opacity:.7; filter:grayscale(.2); }
+
+    /* ── Nav badge flash ── */
+    @keyframes badge-glow {
+      0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0);border-color:rgba(74,222,128,0.18);}
+      50%{box-shadow:0 0 16px rgba(74,222,128,.5),0 0 32px rgba(74,222,128,.2);border-color:rgba(74,222,128,.6);}
     }
+    .legend-badge {
+      animation:badge-glow 1.8s ease-in-out infinite;
+      cursor:pointer;transition:transform .2s;
+    }
+    .legend-badge:hover{transform:scale(1.06);}
+
+    /* ── Check-in mini modal ── */
+    .checkin-modal{
+      position:fixed;inset:0;z-index:600;
+      background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity .25s ease;
+    }
+    .checkin-modal.open{opacity:1;pointer-events:all;}
+    .checkin-box{
+      background:#0d1a0f;border:1px solid rgba(184,201,168,0.18);
+      border-radius:26px;padding:36px 32px;
+      max-width:360px;width:90%;text-align:center;
+      transform:translateY(22px) scale(.95);
+      transition:transform .38s cubic-bezier(.34,1.56,.64,1);
+      box-shadow:0 40px 100px rgba(0,0,0,.65);
+    }
+    body.day .checkin-box{background:#f5f0e8;border-color:rgba(200,180,140,0.4);}
+    .checkin-modal.open .checkin-box{transform:translateY(0) scale(1);}
 
     /* ── Modal ── */
     .modal-overlay{
@@ -363,6 +395,19 @@
   </div>
 </div>
 
+<!-- Check-in modal -->
+<div class="checkin-modal" id="checkin-modal">
+  <div class="checkin-box">
+    <div id="ci-avatar" style="width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 18px;border:3px solid var(--ember);"></div>
+    <div id="ci-title" style="font-family:'Playfair Display',serif;font-size:24px;color:#d4e3c4;margin-bottom:6px;"></div>
+    <div id="ci-sub" style="font-size:14px;color:#8a9e7a;margin-bottom:26px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeCheckin()" style="flex:1;padding:13px;background:rgba(184,201,168,0.08);border:1px solid rgba(184,201,168,0.15);border-radius:12px;color:#8a9e7a;font-size:14px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(184,201,168,0.14)'" onmouseout="this.style.background='rgba(184,201,168,0.08)'">Not me</button>
+      <button id="ci-confirm-btn" onclick="confirmCheckin()" style="flex:2;padding:13px;background:linear-gradient(135deg,#ff6b2b,#f59e0b);border:none;border-radius:12px;color:#060d07;font-weight:700;font-size:15px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:transform .2s;box-shadow:0 8px 28px rgba(255,107,43,.28);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">I'm In! 🔥</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ NAV ═══ -->
 <nav>
   <div style="font-family:'Playfair Display',serif;font-size:22px;" class="fire-text">⛺ CampCrew</div>
@@ -371,9 +416,10 @@
       <span id="theme-icon">☀️</span>
       <span id="theme-label">Day Mode</span>
     </button>
-    <div style="display:flex;align-items:center;gap:7px;background:rgba(184,201,168,0.07);border:1px solid rgba(184,201,168,0.12);border-radius:30px;padding:8px 14px;font-size:13px;color:#8a9e7a;">
-      <span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px rgba(74,222,128,.6);"></span>
-      7 Legends In
+    <div id="legend-badge" class="legend-badge" onclick="document.getElementById('crew').scrollIntoView({behavior:'smooth'})"
+         style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.18);border-radius:30px;padding:8px 16px;font-size:13px;color:#6ee7a0;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px rgba(74,222,128,.7);animation:badge-glow 1.8s ease-in-out infinite;"></span>
+      <span id="badge-count">0</span>&nbsp;/ 7 Legends In
     </div>
   </div>
 </nav>
@@ -525,7 +571,7 @@
 <div style="max-width:860px;margin:0 auto;padding:0 24px;"><div class="fire-divider reveal"></div></div>
 
 <!-- ═══ CREW ═══ -->
-<section style="padding:100px 24px;max-width:1200px;margin:0 auto;">
+<section id="crew" style="padding:100px 24px;max-width:1200px;margin:0 auto;">
   <div class="reveal" style="text-align:center;margin-bottom:56px;">
     <div style="font-size:11px;color:var(--ember);text-transform:uppercase;letter-spacing:.16em;margin-bottom:12px;">👥 The Squad</div>
     <h2 style="font-family:'Playfair Display',serif;font-size:clamp(38px,6vw,68px);color:var(--text-hi);transition:color 2.4s ease;">The <span class="fire-text">Crew</span></h2>
@@ -569,6 +615,65 @@ const ITEMS = [
 let state = {};
 try { state = JSON.parse(localStorage.getItem('campCrew_v3') || '{}'); } catch(e){}
 const save = () => localStorage.setItem('campCrew_v3', JSON.stringify(state));
+
+let checkedIn = new Set();
+try { checkedIn = new Set(JSON.parse(localStorage.getItem('campCrew_in') || '[]')); } catch(e){}
+const saveIn = () => localStorage.setItem('campCrew_in', JSON.stringify([...checkedIn]));
+
+function updateLegendCount() {
+  document.getElementById('badge-count').textContent = checkedIn.size;
+}
+
+let checkinTarget = null;
+
+function openCheckin(userId) {
+  const u = USERS.find(u => u.id === userId);
+  const alreadyIn = checkedIn.has(userId);
+  checkinTarget = userId;
+
+  const av = document.getElementById('ci-avatar');
+  av.style.borderColor = u.color;
+  av.innerHTML = u.img
+    ? `<img src="${u.img}" style="width:100%;height:100%;object-fit:cover;" onerror="this.outerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;background:${u.color}18;\\'>${u.emoji}</div>'">`
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;background:${u.color}18;">${u.emoji}</div>`;
+
+  const btn = document.getElementById('ci-confirm-btn');
+  if (alreadyIn) {
+    document.getElementById('ci-title').textContent = `You're in, ${u.name}! 🎉`;
+    document.getElementById('ci-sub').textContent   = 'Changed your mind?';
+    btn.textContent = "👋 Actually I'm out";
+    btn.style.cssText = 'flex:2;padding:13px;background:rgba(255,107,43,0.12);border:1px solid rgba(255,107,43,0.3);border-radius:12px;color:#ff6b2b;font-weight:700;font-size:15px;font-family:\'Space Grotesk\',sans-serif;cursor:pointer;transition:transform .2s;';
+  } else {
+    document.getElementById('ci-title').textContent = `Hey ${u.name}!`;
+    document.getElementById('ci-sub').textContent   = 'Are you in for the BBQ? 🔥';
+    btn.textContent = "I'm In! 🔥";
+    btn.style.cssText = 'flex:2;padding:13px;background:linear-gradient(135deg,#ff6b2b,#f59e0b);border:none;border-radius:12px;color:#060d07;font-weight:700;font-size:15px;font-family:\'Space Grotesk\',sans-serif;cursor:pointer;transition:transform .2s;box-shadow:0 8px 28px rgba(255,107,43,.28);';
+  }
+
+  document.getElementById('checkin-modal').classList.add('open');
+}
+
+function closeCheckin() {
+  document.getElementById('checkin-modal').classList.remove('open');
+  checkinTarget = null;
+}
+
+function confirmCheckin() {
+  if (!checkinTarget) return;
+  const u = USERS.find(u => u.id === checkinTarget);
+  if (checkedIn.has(checkinTarget)) {
+    checkedIn.delete(checkinTarget);
+    showToast(`${u.emoji} ${u.name}`, "Removed from the crew 😢");
+  } else {
+    checkedIn.add(checkinTarget);
+    showToast(`${u.emoji} ${u.name}`, "You're in! See you at the fire 🔥");
+  }
+  saveIn(); updateLegendCount(); renderCrew(); closeCheckin();
+}
+
+document.getElementById('checkin-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('checkin-modal')) closeCheckin();
+});
 
 // ════════════════════════════════════════
 // MODAL STATE
@@ -780,33 +885,44 @@ function renderChecklist() {
 }
 
 function renderCrew() {
-  document.getElementById('crew-grid').innerHTML = USERS.map(u => {
+  const confirmed = USERS.filter(u => checkedIn.has(u.id));
+  const pending   = USERS.filter(u => !checkedIn.has(u.id));
+
+  const makeCard = u => {
+    const isIn = checkedIn.has(u.id);
     const mine = ITEMS.filter(it => {
       const s = state[it.id];
       if (it.subs) return Array.isArray(s) && s.some(c => c.user === u.id);
       return s?.user === u.id;
     });
-    const total = mine.reduce((acc, it) => {
-      if (it.subs) {
-        const c = (state[it.id]||[]).find(c=>c.user===u.id);
-        return acc + (c?.subs?.length||0);
-      }
-      return acc + 1;
+    const subCount = mine.reduce((acc, it) => {
+      if (it.subs) { const c = (state[it.id]||[]).find(c=>c.user===u.id); return acc+(c?.subs?.length||0); }
+      return acc+1;
     }, 0);
 
     return `
-    <div class="crew-card reveal">
-      <div class="crew-avatar" style="border-color:${u.color}66;box-shadow:0 0 28px ${u.color}28;">
-        ${u.img
-          ? `<img src="${u.img}" alt="${u.name}" onerror="this.parentElement.innerHTML='<div class=\\'crew-fallback\\' style=\\'background:${u.color}18;\\'>${u.emoji}</div>'">`
-          : `<div class="crew-fallback" style="background:${u.color}18;">${u.emoji}</div>`
-        }
+    <div class="crew-card reveal ${isIn ? 'confirmed' : 'pending'}" onclick="openCheckin('${u.id}')">
+      <div style="position:relative;display:inline-block;">
+        <div class="crew-avatar" style="${isIn ? `border-color:${u.color};box-shadow:0 0 32px ${u.color}44,0 0 60px ${u.color}18;` : `border-color:${u.color}33;`}">
+          ${u.img
+            ? `<img src="${u.img}" alt="${u.name}" onerror="this.parentElement.innerHTML='<div class=\\'crew-fallback\\' style=\\'background:${u.color}18;\\'>${u.emoji}</div>'">`
+            : `<div class="crew-fallback" style="background:${u.color}18;">${u.emoji}</div>`}
+        </div>
+        ${isIn ? `<div style="position:absolute;bottom:4px;right:4px;width:26px;height:26px;background:#4ade80;border-radius:50%;border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#060d07;">✓</div>` : ''}
       </div>
-      ${total > 0 ? `<div style="margin-top:-14px;margin-left:76px;background:linear-gradient(135deg,#ff6b2b,#f59e0b);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#060d07;border:2px solid var(--bg);z-index:2;position:relative;">${total}</div>` : '<div style="height:10px;"></div>'}
+      ${subCount > 0 ? `<div style="background:linear-gradient(135deg,#ff6b2b,#f59e0b);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800;color:#060d07;margin-top:-6px;">${subCount} item${subCount>1?'s':''}</div>` : '<div style="height:4px;"></div>'}
       <div style="font-weight:700;color:var(--text-hi);font-size:15px;transition:color 2.4s ease;">${u.name}</div>
-      <div style="font-size:13px;min-height:20px;">${mine.map(i=>i.icon).join(' ') || `<span style="color:var(--text-lo);font-size:12px;transition:color 2.4s ease;">Nothing yet</span>`}</div>
+      <div style="font-size:12px;min-height:18px;">
+        ${isIn
+          ? (mine.length ? mine.map(i=>i.icon).join(' ') : `<span style="color:#4ade80;">In! 🔥</span>`)
+          : `<span style="color:var(--text-lo);transition:color 2.4s ease;">Tap to join</span>`}
+      </div>
     </div>`;
-  }).join('');
+  };
+
+  // Confirmed users first, then pending
+  document.getElementById('crew-grid').innerHTML =
+    [...confirmed, ...pending].map(makeCard).join('');
 }
 
 function renderProgress() {
@@ -1010,6 +1126,7 @@ addEventListener('mouseup',  ()=>{cur.style.transform='translate(-50%,-50%) scal
 // ════════════════════════════════════════
 
 render();
+updateLegendCount();
 </script>
 </body>
 </html>
