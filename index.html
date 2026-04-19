@@ -213,7 +213,7 @@
     }
 
     /* ── Crew ── */
-    .crew-card{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;cursor:pointer;}
+    .crew-card{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;cursor:default;}
     .crew-avatar{
       width:120px;height:120px;border-radius:50%;overflow:hidden;
       border:3px solid transparent;
@@ -238,9 +238,8 @@
     }
     .legend-badge {
       animation:badge-glow 1.8s ease-in-out infinite;
-      cursor:pointer;transition:transform .2s;
+      cursor:default;
     }
-    .legend-badge:hover{transform:scale(1.06);}
 
     /* ── Check-in full modal ── */
     .checkin-modal{
@@ -447,7 +446,7 @@
       <span id="theme-icon">☀️</span>
       <span id="theme-label">Day Mode</span>
     </button>
-    <div id="legend-badge" class="legend-badge" onclick="openCheckin()"
+    <div id="legend-badge" class="legend-badge"
          style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.18);border-radius:30px;padding:8px 16px;font-size:13px;color:#6ee7a0;">
       <span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px rgba(74,222,128,.7);animation:badge-glow 1.8s ease-in-out infinite;"></span>
       <span id="badge-count">0</span>&nbsp;/ 7 Legends In
@@ -954,7 +953,7 @@ function renderCrew() {
     }, 0);
 
     return `
-    <div class="crew-card ${isIn ? 'confirmed' : 'pending'}" onclick="openCheckin()">
+    <div class="crew-card ${isIn ? 'confirmed' : 'pending'}">
       <div style="position:relative;display:inline-block;">
         <div class="crew-avatar" style="${isIn ? `border-color:${u.color};box-shadow:0 0 32px ${u.color}44,0 0 60px ${u.color}18;` : `border-color:${u.color}33;`}">
           ${u.img
@@ -1188,6 +1187,9 @@ addEventListener('mouseup',  ()=>{cur.style.transform='translate(-50%,-50%) scal
 
 render();
 updateLegendCount();
+
+// Auto-open check-in modal after hero animations settle
+setTimeout(openCheckin, 1600);
 </script>
 </body>
 </html>
