@@ -226,8 +226,10 @@
 
     /* confirmed vs pending crew states */
     .crew-card.confirmed .crew-avatar { border-color: var(--ember); box-shadow:0 0 32px var(--glow-e),0 0 60px rgba(245,158,11,0.15); }
-    .crew-card.pending { opacity:1; filter:none; }
-    .crew-card.pending:hover { opacity:1; filter:none; }
+    /* grey out unconfirmed ONLY once someone has confirmed */
+    .crew-card.pending { opacity:1; filter:none; transition:opacity .4s,filter .4s; }
+    .has-confirmed .crew-card.pending { opacity:.38; filter:grayscale(.65); }
+    .has-confirmed .crew-card.pending:hover { opacity:.7; filter:grayscale(.2); }
 
     /* ── Nav badge flash ── */
     @keyframes badge-glow {
@@ -952,7 +954,7 @@ function renderCrew() {
     }, 0);
 
     return `
-    <div class="crew-card reveal ${isIn ? 'confirmed' : 'pending'}" onclick="openCheckin()">
+    <div class="crew-card ${isIn ? 'confirmed' : 'pending'}" onclick="openCheckin()">
       <div style="position:relative;display:inline-block;">
         <div class="crew-avatar" style="${isIn ? `border-color:${u.color};box-shadow:0 0 32px ${u.color}44,0 0 60px ${u.color}18;` : `border-color:${u.color}33;`}">
           ${u.img
@@ -972,8 +974,16 @@ function renderCrew() {
   };
 
   // Confirmed users first, then pending
-  document.getElementById('crew-grid').innerHTML =
-    [...confirmed, ...pending].map(makeCard).join('');
+  const grid = document.getElementById('crew-grid');
+  grid.innerHTML = [...confirmed, ...pending].map(makeCard).join('');
+  grid.classList.toggle('has-confirmed', checkedIn.size > 0);
+
+  // Animate in, then clear inline opacity so CSS greying takes over
+  gsap.fromTo('.crew-card',
+    { opacity:0, y:20, scale:.92 },
+    { opacity:1, y:0, scale:1, duration:.5, stagger:.05, ease:'back.out(1.4)',
+      onComplete: () => gsap.set('.crew-card', { clearProps:'opacity' }) }
+  );
 }
 
 function renderProgress() {
