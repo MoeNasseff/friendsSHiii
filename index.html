@@ -355,15 +355,50 @@
     .modal-box::-webkit-scrollbar{width:4px;}
     .modal-box::-webkit-scrollbar-thumb{background:rgba(255,107,43,.3);border-radius:2px;}
 
+    /* ── Birds (day mode) ── */
+    .birds-wrap{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 2.4s ease;}
+    body.day .birds-wrap{opacity:1;}
+    .bird{position:absolute;}
+    @keyframes fly-across{
+      0%  {transform:translateX(-120px) translateY(0px);}
+      30% {transform:translateX(30vw)   translateY(-28px);}
+      65% {transform:translateX(65vw)   translateY(12px);}
+      100%{transform:translateX(calc(100vw + 120px)) translateY(0px);}
+    }
+    @keyframes wing-beat{0%,100%{transform:rotateX(0deg)}50%{transform:rotateX(50deg)}}
+    .bird path{transform-origin:50% 50%;transform-box:fill-box;animation:wing-beat .65s ease-in-out infinite;}
+    .b1{top:10%;animation:fly-across 18s linear infinite;}
+    .b2{top:17%;animation:fly-across 25s linear infinite 6s;}
+    .b3{top:8%; animation:fly-across 15s linear infinite 11s;}
+    .b4{top:23%;animation:fly-across 21s linear infinite 2s;}
+    .b5{top:13%;animation:fly-across 29s linear infinite 8s;}
+    .b6{top:6%; animation:fly-across 13s linear infinite 15s;}
+
     /* ── Responsive ── */
     @media(max-width:900px){
-      nav{padding:14px 20px;}
+      nav{padding:12px 20px;}
       #crew-grid{grid-template-columns:repeat(4,1fr)!important;}
     }
     @media(max-width:640px){
+      nav{padding:10px 14px;}
+      #theme-btn{padding:6px 10px;font-size:11px;gap:5px;}
+      .theme-label{display:none;}
+      #legend-badge{padding:6px 10px;font-size:11px;gap:5px;}
+      .legend-text{display:none;}
+      #hero{padding:90px 16px 60px;}
+      #h-stats{gap:20px;}
       #location-grid{grid-template-columns:1fr!important;}
       #crew-grid{grid-template-columns:repeat(3,1fr)!important;}
       #checklist-grid{grid-template-columns:1fr!important;}
+      .crew-avatar{width:80px!important;height:80px!important;}
+      .modal-box{padding:26px 18px;}
+      #ci-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px;}
+      .ci-card{padding:11px 7px;}
+    }
+    @media(max-width:400px){
+      #crew-grid{grid-template-columns:repeat(2,1fr)!important;}
+      .crew-avatar{width:68px!important;height:68px!important;}
+      #ci-grid{grid-template-columns:repeat(2,1fr)!important;}
     }
 
     /* text color transitions */
@@ -375,6 +410,16 @@
 <div id="cursor"></div>
 <div id="cursor-trail"></div>
 <canvas id="bg-canvas"></canvas>
+
+<!-- Day-mode birds -->
+<div class="birds-wrap" id="birds-wrap">
+  <svg class="bird b1" viewBox="0 0 52 18" width="52" height="18"><path d="M0,9 Q13,0 26,9 Q39,0 52,9" fill="none" stroke="#1a3a20" stroke-width="2.5" stroke-linecap="round"/></svg>
+  <svg class="bird b2" viewBox="0 0 38 13" width="38" height="13"><path d="M0,6.5 Q9.5,0 19,6.5 Q28.5,0 38,6.5" fill="none" stroke="#1a3a20" stroke-width="2" stroke-linecap="round"/></svg>
+  <svg class="bird b3" viewBox="0 0 28 10" width="28" height="10"><path d="M0,5 Q7,0 14,5 Q21,0 28,5" fill="none" stroke="#2d5a2d" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <svg class="bird b4" viewBox="0 0 44 15" width="44" height="15"><path d="M0,7.5 Q11,0 22,7.5 Q33,0 44,7.5" fill="none" stroke="#1a3a20" stroke-width="2.2" stroke-linecap="round"/></svg>
+  <svg class="bird b5" viewBox="0 0 32 11" width="32" height="11"><path d="M0,5.5 Q8,0 16,5.5 Q24,0 32,5.5" fill="none" stroke="#2d5a2d" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <svg class="bird b6" viewBox="0 0 24 9" width="24" height="9"><path d="M0,4.5 Q6,0 12,4.5 Q18,0 24,4.5" fill="none" stroke="#3a6a3a" stroke-width="1.6" stroke-linecap="round"/></svg>
+</div>
 <div id="sky-layer"></div>
 <div id="sun"></div>
 
@@ -444,12 +489,12 @@
   <div style="display:flex;align-items:center;gap:12px;">
     <button id="theme-btn" onclick="toggleTheme()">
       <span id="theme-icon">☀️</span>
-      <span id="theme-label">Day Mode</span>
+      <span id="theme-label" class="theme-label">Day Mode</span>
     </button>
     <div id="legend-badge" class="legend-badge"
          style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.18);border-radius:30px;padding:8px 16px;font-size:13px;color:#6ee7a0;">
       <span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px rgba(74,222,128,.7);animation:badge-glow 1.8s ease-in-out infinite;"></span>
-      <span id="badge-count">0</span>&nbsp;/ 7 Legends In
+      <span id="badge-count">0</span><span class="legend-text">&nbsp;/ 7 Legends In</span><span class="legend-mobile" style="display:none;">/7 🔥</span>
     </div>
   </div>
 </nav>
@@ -650,6 +695,10 @@ let checkedIn = new Set();
 try { checkedIn = new Set(JSON.parse(localStorage.getItem('campCrew_in') || '[]')); } catch(e){}
 const saveIn = () => localStorage.setItem('campCrew_in', JSON.stringify([...checkedIn]));
 
+// Session identity — who YOU are on this device (resets on tab close)
+let myUserId = sessionStorage.getItem('campCrew_me') || null;
+const saveMe = () => myUserId ? sessionStorage.setItem('campCrew_me', myUserId) : sessionStorage.removeItem('campCrew_me');
+
 function updateLegendCount() {
   document.getElementById('badge-count').textContent = checkedIn.size;
 }
@@ -691,13 +740,15 @@ function toggleCheckin(userId) {
 
   if (wasIn) {
     checkedIn.delete(userId);
+    if (myUserId === userId) { myUserId = null; saveMe(); }
     showToast(`${u.emoji} ${u.name}`, "Stepped out 😢");
   } else {
     checkedIn.add(userId);
+    myUserId = userId; saveMe();
     showToast(`${u.emoji} ${u.name}`, "You're in! See you at the fire 🔥");
   }
 
-  saveIn(); updateLegendCount(); renderCrew();
+  saveIn(); updateLegendCount(); renderCrew(); renderChecklist();
 
   // animate the card in the modal
   const card = document.getElementById('ci-card-' + userId);
@@ -750,7 +801,7 @@ function openModal(itemId) {
   const existing = item.subs
     ? (state[itemId] || [])
     : state[itemId];
-  pickedUser = item.subs ? null : (existing?.user || null);
+  pickedUser = myUserId || (item.subs ? null : (existing?.user || null));
 
   document.getElementById('m-icon').textContent = item.icon;
   document.getElementById('m-name').textContent = item.name;
@@ -857,6 +908,11 @@ document.getElementById('modal').addEventListener('click', e => {
 // TOAST
 // ════════════════════════════════════════
 
+function promptIdentify() {
+  showToast('👆 Pick yourself first', 'Choose your name in the check-in modal');
+  openCheckin();
+}
+
 let _tt;
 function showToast(title, sub) {
   document.getElementById('toast-title').textContent = title;
@@ -918,8 +974,10 @@ function renderChecklist() {
         </div>`;
     }
 
+    const locked = !myUserId;
     return `
-    <div class="item-card glass ${isClaimed ? 'claimed' : ''}" onclick="openModal('${item.id}')">
+    <div class="item-card glass ${isClaimed ? 'claimed' : ''}" onclick="${locked ? 'promptIdentify()' : `openModal('${item.id}')`}" style="cursor:${locked ? 'not-allowed' : 'pointer'}">
+      ${locked ? `<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0);display:flex;align-items:flex-end;justify-content:flex-end;padding:12px;pointer-events:none;z-index:2;"><span style="font-size:11px;color:rgba(184,201,168,0.35);background:rgba(0,0,0,0.3);border-radius:8px;padding:3px 8px;">🔒 identify first</span></div>` : ''}
       ${isClaimed ? `<div style="position:absolute;inset:0;border-radius:22px;background:radial-gradient(ellipse at top right,rgba(245,158,11,0.08),transparent 65%);pointer-events:none;"></div>` : ''}
       <div style="position:relative;display:flex;align-items:center;gap:16px;margin-bottom:20px;">
         <div style="width:54px;height:54px;border-radius:15px;background:rgba(255,107,43,0.1);border:1px solid rgba(255,107,43,0.18);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">${item.icon}</div>
