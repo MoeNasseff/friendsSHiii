@@ -373,12 +373,12 @@
     .b4 {top:23%;animation:fly-across 21s linear infinite 2s;}
     .b5 {top:13%;animation:fly-across 29s linear infinite 8s;}
     .b6 {top:6%; animation:fly-across 13s linear infinite 15s;}
-    .b7 {top:19%;animation:fly-across 17s linear infinite 4s;}
-    .b8 {top:11%;animation:fly-across 22s linear infinite 19s;}
-    .b9 {top:26%;animation:fly-across 16s linear infinite 7s;}
-    .b10{top:4%; animation:fly-across 26s linear infinite 13s;}
-    .b11{top:21%;animation:fly-across 20s linear infinite 22s;}
-    .b12{top:14%;animation:fly-across 32s linear infinite 1s;}
+    .b7 {top:32%;animation:fly-across 17s linear infinite 4s;}
+    .b8 {top:38%;animation:fly-across 22s linear infinite 19s;}
+    .b9 {top:44%;animation:fly-across 16s linear infinite 7s;}
+    .b10{top:28%;animation:fly-across 26s linear infinite 13s;}
+    .b11{top:46%;animation:fly-across 20s linear infinite 22s;}
+    .b12{top:35%;animation:fly-across 32s linear infinite 1s;}
 
     /* ── Clouds (day mode) ── */
     .clouds-wrap{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 3s ease;}
@@ -386,12 +386,33 @@
     .cloud{position:absolute;filter:blur(6px);}
     @keyframes drift-l{from{transform:translateX(-350px)}to{transform:translateX(calc(100vw + 350px))}}
     @keyframes drift-r{from{transform:translateX(calc(100vw + 280px))}to{transform:translateX(-280px)}}
-    .cl1{top:3%; animation:drift-l 90s  linear infinite;}
-    .cl2{top:14%;animation:drift-l 130s linear infinite 35s;}
-    .cl3{top:7%; animation:drift-r 75s  linear infinite 18s;}
-    .cl4{top:22%;animation:drift-l 110s linear infinite 60s;}
-    .cl5{top:1%; animation:drift-r 95s  linear infinite 5s;}
-    .cl6{top:18%;animation:drift-l 160s linear infinite 80s;}
+    .cl1{top:4%;  animation:drift-l 90s  linear infinite;}
+    .cl2{top:24%; animation:drift-l 130s linear infinite 35s;}
+    .cl3{top:38%; animation:drift-r 75s  linear infinite 18s;}
+    .cl4{top:14%; animation:drift-l 110s linear infinite 60s;}
+    .cl5{top:48%; animation:drift-r 95s  linear infinite 5s;}
+    .cl6{top:32%; animation:drift-l 160s linear infinite 80s;}
+
+    /* ═══ COUNTDOWN ═══ */
+    #countdown-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:52px;}
+    .cd-row{display:flex;align-items:center;gap:10px;}
+    .cd-unit{display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .cd-card{
+      position:relative;width:90px;height:98px;
+      background:var(--card-bg);border:1px solid rgba(255,107,43,0.28);
+      border-radius:20px;display:flex;align-items:center;justify-content:center;
+      overflow:hidden;backdrop-filter:blur(16px);
+      box-shadow:0 0 40px rgba(255,107,43,0.14),0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.07);
+      transition:background 2.4s ease,border-color 2.4s ease;
+    }
+    .cd-card::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,107,43,0.15);pointer-events:none;}
+    .cd-num{font-family:'Playfair Display',serif;font-size:54px;font-weight:900;color:var(--ember);line-height:1;display:block;text-shadow:0 0 28px rgba(255,107,43,.65),0 0 70px rgba(255,107,43,.3);transition:color 2.4s ease;}
+    .cd-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--text-lo);transition:color 2.4s ease;}
+    .cd-sep{font-family:'Playfair Display',serif;font-size:44px;color:var(--ember);opacity:.5;margin-bottom:24px;line-height:1;animation:cd-blink 1s ease-in-out infinite;transition:color 2.4s ease;}
+    @keyframes cd-blink{0%,100%{opacity:.5;}50%{opacity:.12;}}
+    .cd-header{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ember);opacity:.75;}
+    .cd-footer{font-size:12px;letter-spacing:.1em;color:var(--text-lo);transition:color 2.4s ease;}
+    @media(max-width:640px){.cd-card{width:68px;height:76px;}.cd-num{font-size:38px;}.cd-sep{font-size:30px;margin-bottom:16px;}.cd-row{gap:6px;}}
 
     /* ── Responsive ── */
     @media(max-width:900px){
@@ -605,6 +626,33 @@
     </div>
   </div>
 
+  <!-- Countdown -->
+  <div id="countdown-wrap" style="opacity:0;">
+    <div class="cd-header">T &mdash; M I N U S</div>
+    <div class="cd-row">
+      <div class="cd-unit">
+        <div class="cd-card"><span class="cd-num" id="cd-days">03</span></div>
+        <div class="cd-label">Days</div>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit">
+        <div class="cd-card"><span class="cd-num" id="cd-hours">00</span></div>
+        <div class="cd-label">Hours</div>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit">
+        <div class="cd-card"><span class="cd-num" id="cd-mins">00</span></div>
+        <div class="cd-label">Mins</div>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit">
+        <div class="cd-card"><span class="cd-num" id="cd-secs">00</span></div>
+        <div class="cd-label">Secs</div>
+      </div>
+    </div>
+    <div class="cd-footer">Until the fire starts &nbsp;&middot;&nbsp; Thu Apr 23 &nbsp;&middot;&nbsp; Wadi Degla</div>
+  </div>
+
   <!-- Campfire SVG -->
   <div id="h-fire" style="margin-bottom:44px;filter:drop-shadow(0 0 36px rgba(255,107,43,.55)) drop-shadow(0 0 80px rgba(245,158,11,.2));opacity:0;">
     <svg width="130" height="110" viewBox="0 0 130 110" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -622,7 +670,7 @@
   </div>
 
   <div class="scroll-bob" style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-lo);font-size:13px;transition:color 2.4s ease;">
-    <span>Claim your item</span>
+    <span>Choose your item</span>
     <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
       <path d="M10 4v12M5 11l5 5 5-5" stroke="var(--ember)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
@@ -1060,7 +1108,7 @@ function renderChecklist() {
         </div>
         <div class="num-badge">${i+1}</div>
       </div>
-      <div style="height:1px;background:rgba(184,201,168,0.07);margin-bottom:16px;"></div>
+      <div style="height:1px;background:rgba(184,201,168,0.07);margin-bottom:28px;"></div>
       ${claimContent}
     </div>`;
   }).join('');
@@ -1168,6 +1216,46 @@ function startAutoRotate() {
 
 // Start rotating after 45s
 startAutoRotate();
+
+// ════════════════════════════════════════
+// COUNTDOWN
+// ════════════════════════════════════════
+(function startCountdown() {
+  const target = new Date('2026-04-23T18:00:00').getTime();
+
+  function flipUnit(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const formatted = String(val).padStart(2, '0');
+    if (el.textContent === formatted) return;
+    gsap.to(el, {
+      y: -22, opacity: 0, duration: .15, ease: 'power2.in',
+      onComplete() {
+        el.textContent = formatted;
+        gsap.fromTo(el,
+          { y: 22, opacity: 0, filter: 'blur(5px)' },
+          { y: 0, opacity: 1, filter: 'blur(0px)', duration: .2, ease: 'power2.out' }
+        );
+      }
+    });
+  }
+
+  function tick() {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      const w = document.getElementById('countdown-wrap');
+      if (w) w.innerHTML = `<div class="fire-text" style="font-family:'Playfair Display',serif;font-size:clamp(26px,5vw,46px);text-align:center;">🔥 The Fire is Lit!</div>`;
+      return;
+    }
+    flipUnit('cd-days',  Math.floor(diff / 86400000));
+    flipUnit('cd-hours', Math.floor((diff % 86400000) / 3600000));
+    flipUnit('cd-mins',  Math.floor((diff % 3600000) / 60000));
+    flipUnit('cd-secs',  Math.floor((diff % 60000) / 1000));
+  }
+
+  tick();
+  setInterval(tick, 1000);
+})();
 
 // ════════════════════════════════════════
 // THREE.JS
@@ -1292,6 +1380,7 @@ gsap.timeline({ delay:.25 })
   .from('#h-title', { opacity:0, y:44, duration:1,   ease:'power3.out' }, '-=.55')
   .from('#h-sub',   { opacity:0, y:28, duration:.75, ease:'power3.out' }, '-=.65')
   .from('#h-stats', { opacity:0, y:26, duration:.7,  ease:'power3.out' }, '-=.55')
+  .fromTo('#countdown-wrap', { opacity:0, y:24 }, { opacity:1, y:0, duration:.7, ease:'power3.out' }, '-=.55')
   .from('#h-fire',  { opacity:0, scale:.78, duration:.9, ease:'back.out(1.7)' }, '-=.48');
 
 gsap.utils.toArray('.reveal').forEach(el => {
